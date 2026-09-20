@@ -36,10 +36,10 @@ const (
 var banner = fmt.Sprintf(`
 ███╗    ██╗███████╗████████╗███████╗ ██████╗ ██████╗ ███████╗███╗    ██╗███████╗██╗ ██████╗███████╗
 ████╗   ██║██╔════╝╚══██╔══╝██╔════╝██╔═══██╗██╔══██╗██╔════╝████╗   ██║██╔════╝██║██╔════╝██╔════╝
-██╔██╗ ██║█████╗      ██║   █████╗  ██║   ██║██████╔╝█████╗  ██╔██╗ ██║███████╗██║██║     ███████╗
-██║╚██╗██║██╔══╝      ██║   ██╔══╝  ██║   ██║██╔══██╗██╔══╝  ██║╚██╗██║╚════██║██║██║     ╚════██║
-██║ ╚████║███████╗    ██║   ██║     ╚██████╔╝██║  ██║███████╗██║ ╚████║███████║██║╚██████╗███████║
-╚═╝  ╚═══╝╚══════╝    ╚═╝   ╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚══════╝╚═╝ ╚═════╝╚══════╝
+██╔██╗ ██║█████╗     ██║   █████╗  ██║   ██║██████╔╝█████╗  ██╔██╗ ██║███████╗██║██║     ███████╗
+██║╚██╗██║██╔══╝     ██║   ██╔══╝  ██║   ██║██╔══██╗██╔══╝  ██║╚██╗██║╚════██║██║██║     ╚════██║
+██║ ╚████║███████╗   ██║   ██║     ╚██████╔╝██║  ██║███████╗██║ ╚████║███████║██║╚██████╗███████║
+╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚══════╝╚═╝ ╚═════╝╚══════╝
     Enterprise Network Forensics & PCAP Artifact Collector | DFIR Investigation Suite
     Developer: %s | GitHub: %s | Version: %s
 `, Author, GitHubURL, Version)
@@ -161,7 +161,6 @@ func main() {
 	if runHeadless {
 		fmt.Print(banner)
 		fmt.Printf("\n[*] NetForensics Forensic Engine Activated\n")
-		fmt.Printf("[*] Lead Investigator:    %s\n", investigatorName)
 		fmt.Printf("[*] Ingestion Source:     %s\n", sourceDesc)
 		fmt.Printf("[*] Carving Directory:    %s\n", absArtifactsDir)
 		if *bpfFilter != "" {
@@ -382,11 +381,12 @@ func main() {
 
 	// Final Summary Report
 	stats := capEngine.Stats().Snapshot()
+	currentTime := time.Now().Format("2006-01-02 15:04:05 MST")
+
 	fmt.Printf("\n================================================================================\n")
 	fmt.Printf("                    NETFORENSICS DFIR INVESTIGATION SUMMARY                    \n")
 	fmt.Printf("================================================================================\n")
-	fmt.Printf("  Lead Investigator:    %s\n", investigatorName)
-	fmt.Printf("  Tool Developer:       %s (%s)\n", Author, GitHubURL)
+	fmt.Printf("  Execution Time:       %s\n", currentTime)
 	fmt.Printf("  Session Duration:     %v\n", stats.Duration.Round(time.Millisecond))
 	fmt.Printf("  Packets Ingested:     %d (%.0f pkt/s)\n", stats.TotalPackets, stats.PacketsPerSec)
 	fmt.Printf("  Traffic Volume:       %d bytes\n", stats.TotalBytes)
