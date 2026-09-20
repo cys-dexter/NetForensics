@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"os/user"
 	"path/filepath"
 	"strings"
 	"sync/atomic"
@@ -33,14 +34,14 @@ const (
 )
 
 var banner = fmt.Sprintf(`
-███╗   ██╗███████╗████████╗███████╗ ██████╗ ██████╗ ███████╗███╗   ██╗███████╗██╗ ██████╗███████╗
-████╗  ██║██╔════╝╚══██╔══╝██╔════╝██╔═══██╗██╔══██╗██╔════╝████╗  ██║██╔════╝██║██╔════╝██╔════╝
-██╔██╗ ██║█████╗     ██║   █████╗  ██║   ██║██████╔╝█████╗  ██╔██╗ ██║███████╗██║██║     ███████╗
-██║╚██╗██║██╔══╝     ██║   ██╔══╝  ██║   ██║██╔══██╗██╔══╝  ██║╚██╗██║╚════██║██║██║     ╚════██║
-██║ ╚████║███████╗   ██║   ██║     ╚██████╔╝██║  ██║███████╗██║ ╚████║███████║██║╚██████╗███████║
-╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚══════╝╚═╝ ╚═════╝╚══════╝
-   Enterprise Network Forensics & PCAP Artifact Collector | DFIR Investigation Suite
-   Developer: %s | GitHub: %s | Version: %s
+███╗    ██╗███████╗████████╗███████╗ ██████╗ ██████╗ ███████╗███╗    ██╗███████╗██╗ ██████╗███████╗
+████╗   ██║██╔════╝╚══██╔══╝██╔════╝██╔═══██╗██╔══██╗██╔════╝████╗   ██║██╔════╝██║██╔════╝██╔════╝
+██╔██╗ ██║█████╗      ██║   █████╗  ██║   ██║██████╔╝█████╗  ██╔██╗ ██║███████╗██║██║     ███████╗
+██║╚██╗██║██╔══╝      ██║   ██╔══╝  ██║   ██║██╔══██╗██╔══╝  ██║╚██╗██║╚════██║██║██║     ╚════██║
+██║ ╚████║███████╗    ██║   ██║     ╚██████╔╝██║  ██║███████╗██║ ╚████║███████║██║╚██████╗███████║
+╚═╝  ╚═══╝╚══════╝    ╚═╝   ╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚══════╝╚═╝ ╚═════╝╚══════╝
+    Enterprise Network Forensics & PCAP Artifact Collector | DFIR Investigation Suite
+    Developer: %s | GitHub: %s | Version: %s
 `, Author, GitHubURL, Version)
 
 func main() {
@@ -50,6 +51,7 @@ func main() {
 	artifactsDir := flag.String("out-dir", "./extracted_artifacts", "Target directory to write carved files")
 	timelinePath := flag.String("timeline", "", "Output path for forensic event timeline (e.g. evidence_timeline.json)")
 	exportFmt := flag.String("o", "json", "Timeline export format ('json' or 'csv')")
+	investigatorFlag := flag.String("investigator", "", "Name of the lead investigator (defaults to current OS user)")
 	headless := flag.Bool("headless", false, "Run in non-interactive CLI mode (ideal for SOC automation & scripts)")
 	verbose := flag.Bool("v", false, "Enable verbose packet inspection logging")
 	showVersion := flag.Bool("version", false, "Print version, author information, and exit")
@@ -61,8 +63,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "\nExamples:\n")
 		fmt.Fprintf(os.Stderr, "  # Analyze offline PCAP file with interactive TUI:\n")
 		fmt.Fprintf(os.Stderr, "  netforensics -r suspicious_traffic.pcap\n\n")
-		fmt.Fprintf(os.Stderr, "  # Automated headless PCAP analysis with JSON timeline export:\n")
-		fmt.Fprintf(os.Stderr, "  netforensics -r malware_c2.pcapng -headless -timeline evidence.json -o json\n\n")
+		fmt.Fprintf(os.Stderr, "  # Specify custom Lead Investigator in headless mode:\n")
+		fmt.Fprintf(os.Stderr, "  netforensics -r malware_c2.pcapng -headless -investigator \"Ahmad - DFIR Lead\"\n\n")
 		fmt.Fprintf(os.Stderr, "  # Live capture on eth0 filtering DNS and HTTP:\n")
 		fmt.Fprintf(os.Stderr, "  sudo netforensics -i eth0 -bpf 'port 53 or port 80'\n\n")
 	}
@@ -79,6 +81,16 @@ func main() {
 		fmt.Fprintln(os.Stderr, "\n[!] Error: You must specify either an offline capture file (-r) or a live interface (-i).")
 		fmt.Fprintln(os.Stderr, "    Run with -h or --help for full usage instructions.")
 		os.Exit(1)
+	}
+
+	// Dynamic Resolution of Lead Investigator Name
+	investigatorName := *investigatorFlag
+	if investigatorName == "" {
+		if currentUser, err := user.Current(); err == nil && currentUser.Username != "" {
+			investigatorName = currentUser.Username
+		} else {
+			investigatorName = Author // Fallback to Developer Name
+		}
 	}
 
 	// Auto-detect non-TTY environment (redirected stdout or CI/pipeline)
@@ -116,7 +128,7 @@ func main() {
 		Source:      "NetForensics Engine",
 		Destination: sourceDesc,
 		Protocol:    "SYSTEM",
-		Summary:     fmt.Sprintf("Forensic capture session started (Source: %s)", sourceDesc),
+		Summary:     fmt.Sprintf("Forensic capture session started (Investigator: %s | Source: %s)", investigatorName, sourceDesc),
 		Details:     fmt.Sprintf("Artifacts Directory: %s | BPF Filter: %q", absArtifactsDir, *bpfFilter),
 	})
 
@@ -149,6 +161,7 @@ func main() {
 	if runHeadless {
 		fmt.Print(banner)
 		fmt.Printf("\n[*] NetForensics Forensic Engine Activated\n")
+		fmt.Printf("[*] Lead Investigator:    %s\n", investigatorName)
 		fmt.Printf("[*] Ingestion Source:     %s\n", sourceDesc)
 		fmt.Printf("[*] Carving Directory:    %s\n", absArtifactsDir)
 		if *bpfFilter != "" {
@@ -372,8 +385,8 @@ func main() {
 	fmt.Printf("\n================================================================================\n")
 	fmt.Printf("                    NETFORENSICS DFIR INVESTIGATION SUMMARY                    \n")
 	fmt.Printf("================================================================================\n")
-	fmt.Printf("  Lead Investigator:    %s\n", Author)
-	fmt.Printf("  GitHub Reference:     %s\n", GitHubURL)
+	fmt.Printf("  Lead Investigator:    %s\n", investigatorName)
+	fmt.Printf("  Tool Developer:       %s (%s)\n", Author, GitHubURL)
 	fmt.Printf("  Session Duration:     %v\n", stats.Duration.Round(time.Millisecond))
 	fmt.Printf("  Packets Ingested:     %d (%.0f pkt/s)\n", stats.TotalPackets, stats.PacketsPerSec)
 	fmt.Printf("  Traffic Volume:       %d bytes\n", stats.TotalBytes)
