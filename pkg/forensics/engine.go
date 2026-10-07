@@ -106,3 +106,11 @@ func (e *Engine) AlertCounts() (total, safe, warning, threat int) {
 	}
 	return
 }
+
+// VerifyFileHash يفحص الـ SHA256 عبر خدمة Hashlookup لمعرفة ما إذا كان الملف معروفا وآمناً
+func (e *Engine) VerifyFileHash(sha256Hex string) (bool, string) {
+	if sha256Hex == "" {
+		return false, ""
+	}
+	return CheckHashlookup(sha256Hex)
+}
