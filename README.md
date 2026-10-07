@@ -1,60 +1,156 @@
 # NetForensics
 
-**Enterprise Network Forensics & PCAP Artifact Collector | DFIR Investigation Suite**
+### Enterprise Network Forensics & PCAP Artifact Collector | DFIR Investigation Suite
 
-NetForensics is an enterprise-oriented **Network Forensics and Digital Forensics & Incident Response (DFIR)** tool written in **Go (Golang)**.
+**Developer:** Ahmad  
+**GitHub:** https://github.com/cys-dexter  
+**Version:** `1.0.0`
 
-It is designed for security analysts, incident responders, and network investigators who need to analyze captured network traffic, investigate suspicious activity, detect common network attacks, extract forensic artifacts, and generate structured investigation reports.
-
-NetForensics supports both **offline PCAP/PCAPNG analysis** and **live network packet capture**.
-
----
-
-## 🔑 Key Features
-
-- **Offline PCAP Analysis**
-  - Analyze existing `.pcap` and `.pcapng` network captures.
-  - Inspect captured network traffic without requiring live packet capture.
-
-- **Threat Detection**
-  - Detect potential **ARP Poisoning / ARP Cache Poisoning**.
-  - Identify suspicious **Man-in-the-Middle (MITM)** activity.
-  - Detect **TCP Port Scanning** patterns.
-  - Detect suspicious **DNS Tunneling** and possible data-exfiltration patterns.
-
-- **Artifact Carving**
-  - Extract files and payloads from captured network traffic.
-  - Reassemble relevant TCP streams.
-  - Identify extracted files using file signatures / magic bytes.
-  - Store extracted evidence in the `extracted_artifacts/` directory.
-
-- **Forensic Hashing**
-  - Generate SHA-256 hashes for extracted artifacts.
-  - Generate MD5 hashes for artifact identification and verification.
-
-- **Forensic Timeline**
-  - Track packets, alerts, and extracted artifacts chronologically.
-  - Support structured evidence and investigation workflows.
-
-- **Report Export**
-  - Export forensic data as **JSON**.
-  - Export forensic timelines as **CSV**.
-
-- **Live Network Capture**
-  - Capture packets directly from a selected network interface.
-  - Designed for authorized network monitoring and DFIR investigations.
+[![Go](https://img.shields.io/badge/Go-1.22%2B-00ADD8?style=flat-square&logo=go)](https://go.dev/)
+[![DFIR](https://img.shields.io/badge/DFIR-Network%20Forensics-red?style=flat-square)]
+[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20POSIX-orange?style=flat-square)]
+[![License](https://img.shields.io/badge/License-MIT-black?style=flat-square)](LICENSE)
 
 ---
 
-## 📋 Prerequisites
+## 📖 Overview
 
-Before installing NetForensics, make sure the following requirements are installed.
+**NetForensics** is an enterprise-oriented **Network Forensics and Digital Forensics & Incident Response (DFIR)** investigation suite written in **Go (Golang)**.
 
-### Go
+It is designed for security analysts, SOC teams, incident responders, and forensic investigators who need to inspect network traffic, analyze PCAP evidence, identify suspicious network behavior, extract transferred artifacts, calculate forensic hashes, and produce structured investigation reports.
+
+NetForensics supports two primary investigation workflows:
+
+1. **Offline Forensics** — analyze previously captured `.pcap` and `.pcapng` files.
+2. **Live Network Monitoring** — capture packets directly from a selected network interface.
+
+The project includes packet parsing, TCP stream reassembly, artifact carving, cryptographic hashing, threat detection, forensic timeline generation, and JSON/CSV export capabilities.
+
+---
+
+# 🚀 Key Features
+
+## Offline Forensics
+
+Analyze existing PCAP and PCAPNG captures without performing live packet capture.
+
+```bash
+./bin/netforensics -r capture.pcap
+```
+
+Supported forensic workflows include packet inspection, protocol analysis, stream reconstruction, threat detection, artifact extraction, and timeline generation.
+
+---
+
+## Live Network Traffic Monitoring
+
+Capture packets directly from a network interface using `libpcap`.
+
+```bash
+sudo ./bin/netforensics -i eth0
+```
+
+Live capture may require elevated privileges depending on the operating system and network-interface permissions.
+
+---
+
+## Threat Detection Engine
+
+NetForensics includes multiple network-threat detection mechanisms, including:
+
+- **ARP Poisoning / ARP Cache Poisoning**
+- **Man-in-the-Middle (MITM) indicators**
+- **TCP Port Scanning**
+- **Xmas Tree scans**
+- **NULL scans**
+- **FIN scans**
+- **Rapid port sweeps**
+- **DNS tunneling / suspicious DNS activity**
+- **Possible DNS-based data exfiltration**
+- **Masscan-style TCP fingerprinting**
+
+The existing project implementation documents stateful ARP inspection, DNS entropy analysis, and several TCP scanning fingerprints.
+
+---
+
+## Artifact Carving & Forensic Extraction
+
+NetForensics can reconstruct relevant network streams and extract transferred payloads.
+
+The forensic pipeline includes:
+
+- TCP stream reassembly
+- HTTP payload extraction
+- FTP transfer correlation
+- File-signature / magic-byte detection
+- Artifact extraction
+- SHA-256 hashing
+- MD5 hashing
+- Evidence timeline integration
+
+Extracted artifacts are written to:
+
+```text
+./extracted_artifacts/
+```
+
+The documented artifact pipeline includes HTTP and FTP extraction as well as magic-byte identification for executables, documents, archives, images, and scripts.
+
+---
+
+## 📊 JSON & CSV Reporting
+
+Investigation data can be exported in structured formats suitable for further analysis.
+
+Supported formats include:
+
+- **JSON**
+- **CSV**
+
+The project documentation specifically describes JSON and RFC 4180 CSV timeline exporters for forensic and SIEM workflows.
+
+---
+
+## 🖥️ Interactive TUI
+
+NetForensics includes an interactive Terminal User Interface for monitoring:
+
+- Live packets
+- Threat alerts
+- Carved artifacts
+- Evidence timeline
+
+The documented interface provides dedicated views for packet activity, forensic alerts, artifacts, and timeline events.
+
+### TUI Keyboard Shortcuts
+
+| Key | Action |
+|---|---|
+| `Tab` / `Shift+Tab` | Cycle between interface panels |
+| `1` | Focus Live Packets |
+| `2` | Focus Threat Alerts |
+| `3` / `f` | Focus Carved Artifacts |
+| `4` | Focus Evidence Timeline |
+| `Arrow Keys` | Navigate records |
+| `e` | Open timeline export |
+| `?` / `F1` | Open help |
+| `q` / `Ctrl+C` | Quit gracefully |
+
+These shortcuts are documented by the project's existing TUI specification.
+
+---
+
+# 📋 Prerequisites
+
+Before installing NetForensics, make sure the following requirements are available.
+
+## Go 1.22+
 
 NetForensics requires:
 
-**Go 1.22 or newer**
+```text
+Go 1.22 or newer
+```
 
 Check your installed version:
 
@@ -68,45 +164,65 @@ Example:
 go version go1.22.x linux/amd64
 ```
 
-If your Go version is older than 1.22, upgrade Go before building the project.
+If your installed version is older than `1.22`, upgrade Go before building the project.
 
 ---
 
-### libpcap
+## libpcap
 
-Live packet capture requires the `libpcap` development library.
+Live packet capture requires the `libpcap` development libraries.
 
-For **Ubuntu / Debian**, install it with:
+### Ubuntu / Debian
+
+Install all required system packages with:
 
 ```bash
-sudo apt install -y libpcap-dev
+sudo apt update && sudo apt install -y libpcap-dev git build-essential
 ```
 
-It is recommended to install the package before attempting to build NetForensics.
+The project documentation identifies `libpcap` development headers as a required dependency.
 
 ---
 
-## 🛠️ Installation & Build
+# 🛠️ Installation & Build
 
-Follow the steps below **in the exact order**.
+## ⚠️ Important Permission Rule
 
-> ### ⚠️ Important: Do NOT use `sudo` with `go build`
->
-> Do **not** build the project using:
->
-> ```bash
-> sudo go build ...
-> ```
->
-> Running Go build commands with `sudo` can create root-owned files inside the project directory, especially inside `bin/`, which can later result in errors such as:
->
-> ```text
-> permission denied
-> ```
->
-> The correct approach is to perform the build as your normal user and use `sudo` only when administrative privileges are actually required, such as installing system packages or performing live packet capture.
+**Do not run `go build` with `sudo`.**
 
-### 1. Clone the Repository
+Avoid:
+
+```bash
+sudo go build ...
+```
+
+Running the Go build as `root` can create root-owned files and directories inside the project, particularly under:
+
+```text
+bin/
+```
+
+This can later cause:
+
+```text
+Permission denied
+```
+
+when your normal user attempts to overwrite or remove the generated executable.
+
+### Correct approach
+
+Use `sudo` only when administrative privileges are actually required, such as:
+
+- Installing system packages.
+- Capturing packets from a restricted network interface.
+- Repairing ownership of files that were previously created by `root`.
+
+Run the Go build itself as your normal user.
+
+---
+
+## 1. Clone the Repository
 
 ```bash
 git clone https://github.com/cys-dexter/NetForensics.git
@@ -120,35 +236,7 @@ cd NetForensics
 
 ---
 
-### 2. Fix Project Ownership
-
-If the project directory or files were previously created using `sudo`, some files may belong to `root`.
-
-To make sure the current user owns the project:
-
-```bash
-sudo chown -R $USER:$USER .
-```
-
-This is especially useful if you previously encountered:
-
-```text
-Permission denied
-```
-
-when trying to remove or overwrite files inside the project.
-
-Verify ownership with:
-
-```bash
-ls -la
-```
-
-The project files should be owned by your current user.
-
----
-
-### 3. Verify Go Dependencies
+## 2. Verify Dependencies
 
 Run:
 
@@ -156,25 +244,23 @@ Run:
 go mod verify
 ```
 
-This verifies that the downloaded Go modules match their expected checksums.
-
-If the verification succeeds, continue to the build step.
+This verifies the downloaded Go modules against their expected checksums.
 
 ---
 
-### 4. Recreate the Binary Directory
+## 3. Prepare the Build Directory
 
-Remove any existing `bin` directory and create a clean one:
+Create a clean `bin` directory:
 
 ```bash
 rm -rf bin && mkdir -p bin
 ```
 
-Because ownership was fixed in the previous step, this command should run without requiring `sudo`.
+Do **not** use `sudo` here.
 
 ---
 
-### 5. Build NetForensics
+## 4. Build NetForensics
 
 Build the optimized executable:
 
@@ -182,27 +268,15 @@ Build the optimized executable:
 go build -ldflags="-s -w" -buildvcs=false -o bin/netforensics ./cmd/netforensics
 ```
 
-**Do not add `sudo` to this command.**
+Again, **do not add `sudo`**.
 
-Correct:
-
-```bash
-go build -ldflags="-s -w" -buildvcs=false -o bin/netforensics ./cmd/netforensics
-```
-
-Incorrect:
-
-```bash
-sudo go build -ldflags="-s -w" -buildvcs=false -o bin/netforensics ./cmd/netforensics
-```
-
-After a successful build, the executable will be located at:
+After a successful build, the executable will be:
 
 ```text
 bin/netforensics
 ```
 
-You can verify it with:
+Verify it:
 
 ```bash
 ls -lh bin/netforensics
@@ -210,107 +284,60 @@ ls -lh bin/netforensics
 
 ---
 
-## 🚨 Troubleshooting Permissions
+# 🔧 Permission Troubleshooting
 
-### `Permission denied` when creating `bin/netforensics`
+If you previously built the project using `sudo`, your project may contain files owned by `root`.
 
-If you receive an error similar to:
-
-```text
-open bin/netforensics: permission denied
-```
-
-or:
-
-```text
-cannot create bin/netforensics: Permission denied
-```
-
-first fix the ownership:
+Check ownership:
 
 ```bash
-sudo chown -R $USER:$USER .
+ls -ld .
+ls -ld bin
 ```
 
-Then recreate the binary directory:
+If `bin` or project files are owned by `root`, repair the ownership:
+
+```bash
+sudo chown -R "$USER:$USER" .
+```
+
+Then recreate the build directory:
 
 ```bash
 rm -rf bin && mkdir -p bin
 ```
 
-Finally rebuild **without `sudo`**:
+Finally rebuild normally:
 
 ```bash
 go build -ldflags="-s -w" -buildvcs=false -o bin/netforensics ./cmd/netforensics
 ```
 
----
+### Do not solve the problem by repeatedly using `sudo go build`
 
-### `bin` is owned by root
+The preferred solution is:
 
-Check the directory:
-
-```bash
-ls -ld bin
-```
-
-If the owner is `root`, fix it with:
-
-```bash
-sudo chown -R $USER:$USER bin
-```
-
-Then build normally:
-
-```bash
-go build -ldflags="-s -w" -buildvcs=false -o bin/netforensics ./cmd/netforensics
+```text
+Fix ownership → clean bin/ → build as normal user
 ```
 
 ---
 
-### General rule for permissions
+# ▶️ Usage
 
-Use `sudo` for administrative operations such as:
-
-```bash
-sudo apt install -y libpcap-dev
-```
-
-and live packet capture:
-
-```bash
-sudo ./bin/netforensics -i eth0
-```
-
-Do **not** normally use `sudo` for:
-
-```bash
-go mod verify
-go test -v -race ./...
-go build ...
-```
-
-This keeps generated files owned by your normal user and prevents recurring permission problems.
-
----
-
-## 🚀 Usage
-
-After successfully building the project, the executable can be used for offline PCAP analysis or live network capture.
-
-### Display Help
-
-Display the available command-line options:
+After building the project successfully, verify the command-line interface:
 
 ```bash
 ./bin/netforensics --help
 ```
 
+This should be the first command used to inspect the available options supported by the compiled application.
+
 ---
 
-### Analyze a PCAP File
+## Offline PCAP Analysis
 
-Analyze an existing PCAP file:
+Analyze an existing capture:
 
 ```bash
 ./bin/netforensics -r /path/to/capture.pcap
@@ -322,35 +349,33 @@ Example:
 ./bin/netforensics -r suspicious_traffic.pcap
 ```
 
-For a PCAPNG capture:
+PCAPNG example:
 
 ```bash
 ./bin/netforensics -r suspicious_traffic.pcapng
 ```
 
-This mode does not require root privileges because the tool is reading an existing capture file rather than directly accessing a live network interface.
+The documented offline mode uses `-r` to provide the PCAP input file.
 
 ---
 
-### Live Network Capture
+# 🌐 Live Network Capture
 
-Live packet capture may require root privileges depending on the system configuration.
-
-Run:
+To capture packets from a network interface:
 
 ```bash
 sudo ./bin/netforensics -i eth0
 ```
 
-Replace `eth0` with the actual interface on your system.
+Replace `eth0` with the interface available on your system.
 
-To list available network interfaces on Linux:
+List interfaces on Linux:
 
 ```bash
 ip link
 ```
 
-Common examples include:
+Possible interfaces include:
 
 ```text
 eth0
@@ -359,115 +384,165 @@ enp0s3
 wlan0
 ```
 
-Then select the appropriate interface:
+Example:
 
 ```bash
 sudo ./bin/netforensics -i wlan0
 ```
 
-> **Note:** Only capture traffic on networks and systems where you have authorization to perform monitoring or forensic analysis.
+Live capture is the scenario where elevated privileges may be required. The project's documented usage also invokes the binary with `sudo` for live sniffing.
 
 ---
 
-## 🧪 Running Tests
+# 🎯 BPF Filtering
 
-Run the complete Go test suite with the race detector:
+NetForensics supports Berkeley Packet Filter expressions for narrowing live capture traffic.
+
+Example:
+
+```bash
+sudo ./bin/netforensics -i eth0 -bpf "port 80 or port 53 or port 21"
+```
+
+This limits captured traffic to the specified ports.
+
+Another example:
+
+```bash
+sudo ./bin/netforensics -i eth0 -bpf "tcp port 80 or udp port 53"
+```
+
+BPF filtering is designed to reduce unnecessary traffic and focus the investigation on relevant flows.
+
+---
+
+# 🤖 Headless / Automated Mode
+
+NetForensics provides a non-interactive mode using:
+
+```text
+-headless
+```
+
+This is useful for automation, scripts, containers, and SOC ingestion pipelines.
+
+Example:
+
+```bash
+./bin/netforensics \
+  -r capture.pcapng \
+  -headless \
+  -timeline evidence.json \
+  -o json \
+  -out-dir ./extracted_artifacts
+```
+
+The documented headless workflow combines PCAP input with timeline output, an output format, and an artifact directory.
+
+---
+
+# 📄 Timeline Export
+
+## JSON
+
+Generate a JSON forensic timeline:
+
+```bash
+./bin/netforensics \
+  -r capture.pcapng \
+  -headless \
+  -timeline evidence.json \
+  -o json \
+  -out-dir ./extracted_artifacts
+```
+
+---
+
+## CSV
+
+Export the timeline as CSV:
+
+```bash
+./bin/netforensics \
+  -r compromise.pcap \
+  -headless \
+  -timeline evidence_report.csv \
+  -o csv
+```
+
+The project documentation describes the CSV exporter as RFC 4180 compatible and intended for structured forensic/SIEM workflows.
+
+---
+
+# 🧪 Running Tests
+
+Run the complete test suite:
 
 ```bash
 go test -v -race ./...
 ```
 
-### What the options mean
+### Options
 
-- `-v` — Displays detailed test output.
-- `-race` — Enables Go's race detector.
-- `./...` — Runs tests across all project packages.
+| Option | Purpose |
+|---|---|
+| `-v` | Verbose test output |
+| `-race` | Enable Go race detection |
+| `./...` | Test all packages |
 
-Do not run the tests with `sudo` unless there is a specific, documented test that requires elevated privileges.
-
----
-
-## 📁 Generated Artifacts
-
-Extracted forensic artifacts are stored in:
-
-```text
-./extracted_artifacts/
-```
-
-Depending on the investigation and captured traffic, the project may produce:
-
-- Extracted files
-- Artifact hashes
-- Threat alerts
-- Timeline events
-- JSON reports
-- CSV reports
-
-The original project also provides structured forensic timeline and artifact processing capabilities.
+Do not use `sudo` for normal unit testing.
 
 ---
 
-## 🔎 Typical Workflow
+# 🧭 Recommended First Run
 
-A new user can follow this workflow from start to finish.
+For a new user, the simplest workflow is:
 
-### 1. Install the required system dependency
+### Step 1 — Install dependencies
 
 ```bash
-sudo apt install -y libpcap-dev
+sudo apt update && sudo apt install -y libpcap-dev git build-essential
 ```
 
-### 2. Clone the project
+### Step 2 — Clone
 
 ```bash
 git clone https://github.com/cys-dexter/NetForensics.git
 cd NetForensics
 ```
 
-### 3. Fix ownership if necessary
-
-```bash
-sudo chown -R $USER:$USER .
-```
-
-### 4. Verify dependencies
+### Step 3 — Verify modules
 
 ```bash
 go mod verify
 ```
 
-### 5. Prepare the binary directory
+### Step 4 — Build
 
 ```bash
 rm -rf bin && mkdir -p bin
-```
-
-### 6. Build without sudo
-
-```bash
 go build -ldflags="-s -w" -buildvcs=false -o bin/netforensics ./cmd/netforensics
 ```
 
-### 7. Verify the executable
+### Step 5 — Check the CLI
 
 ```bash
 ./bin/netforensics --help
 ```
 
-### 8. Analyze a PCAP
+### Step 6 — Analyze a PCAP
 
 ```bash
-./bin/netforensics -r /path/to/capture.pcap
+./bin/netforensics -r capture.pcap
 ```
 
-### 9. Or perform live capture
+### Step 7 — Or perform live capture
 
 ```bash
 sudo ./bin/netforensics -i eth0
 ```
 
-### 10. Run the test suite
+### Step 8 — Run tests
 
 ```bash
 go test -v -race ./...
@@ -475,20 +550,179 @@ go test -v -race ./...
 
 ---
 
-## 👨‍💻 Developer
+# 📁 Project Structure
+
+The documented project follows a modular Go architecture:
+
+```text
+NetForensics/
+├── cmd/
+│   └── netforensics/
+│       └── main.go
+│
+├── pkg/
+│   ├── capture/
+│   │   ├── capture.go
+│   │   └── stats.go
+│   │
+│   ├── reassembly/
+│   │   ├── stream.go
+│   │   ├── carver.go
+│   │   └── ftp.go
+│   │
+│   ├── forensics/
+│   │   ├── engine.go
+│   │   ├── models.go
+│   │   ├── hasher.go
+│   │   ├── dns_tunnel.go
+│   │   ├── arp_poison.go
+│   │   ├── port_scan.go
+│   │   └── forensics_test.go
+│   │
+│   ├── protocols/
+│   │   ├── parser.go
+│   │   ├── types.go
+│   │   ├── dns.go
+│   │   ├── arp.go
+│   │   ├── http.go
+│   │   └── protocols_test.go
+│   │
+│   ├── reporter/
+│   │   ├── timeline.go
+│   │   ├── export_json.go
+│   │   ├── export_csv.go
+│   │   └── reporter_test.go
+│   │
+│   └── ui/
+│       ├── tui.go
+│       ├── views.go
+│       └── keybindings.go
+│
+├── testdata/
+│   ├── generate_pcaps.go
+│   └── forensic_sample.pcap
+│
+├── bin/
+│   └── netforensics
+│
+├── extracted_artifacts/
+├── go.mod
+├── go.sum
+└── README.md
+```
+
+The existing project documentation identifies `cmd/netforensics/main.go` as the CLI entry point and separates capture, reassembly, forensics, protocols, reporting, and TUI functionality into dedicated packages.
+
+---
+
+# 🛡️ Investigation Workflow
+
+A typical investigation can be performed as follows:
+
+```text
+PCAP / Live Interface
+        │
+        ▼
+Packet Capture / Parsing
+        │
+        ├──► Protocol Analysis
+        │
+        ├──► Threat Detection
+        │       ├── ARP Poisoning
+        │       ├── Port Scanning
+        │       └── DNS Tunneling
+        │
+        ├──► TCP Stream Reassembly
+        │
+        ├──► Artifact Carving
+        │
+        ├──► SHA-256 / MD5 Hashing
+        │
+        ▼
+Forensic Timeline
+        │
+        ├──► JSON
+        └──► CSV
+```
+
+This reflects the documented separation between packet ingestion, threat detection, artifact extraction, hashing, timeline generation, and reporting.
+
+---
+
+# ⚠️ Important Operational Notes
+
+### Offline analysis
+
+Offline PCAP analysis normally does not require root privileges:
+
+```bash
+./bin/netforensics -r capture.pcap
+```
+
+### Live capture
+
+Live capture may require elevated privileges:
+
+```bash
+sudo ./bin/netforensics -i eth0
+```
+
+### Building
+
+Do **not** build as root:
+
+```bash
+go build ...
+```
+
+not:
+
+```bash
+sudo go build ...
+```
+
+### Permission errors
+
+If you previously used `sudo` during development:
+
+```bash
+sudo chown -R "$USER:$USER" .
+```
+
+Then clean and rebuild:
+
+```bash
+rm -rf bin && mkdir -p bin
+go build -ldflags="-s -w" -buildvcs=false -o bin/netforensics ./cmd/netforensics
+```
+
+---
+
+# 👨‍💻 Developer
 
 **Developer:** Ahmad
 
 **GitHub:**  
 https://github.com/cys-dexter
 
-**Repository:**  
-https://github.com/cys-dexter/NetForensics
+**Project:**  
+NetForensics
+
+**Version:**  
+`1.0.0`
 
 ---
 
-## 📜 License
+# 📜 License
 
 NetForensics is distributed under the **MIT License**.
 
 See the `LICENSE` file in the repository for the complete license text.
+
+---
+
+## ⚖️ Responsible Use
+
+NetForensics is intended for **authorized security monitoring, network troubleshooting, digital forensics, and incident-response investigations**.
+
+Only capture or analyze network traffic on systems and networks for which you have appropriate authorization.
