@@ -726,3 +726,72 @@ See the `LICENSE` file in the repository for the complete license text.
 NetForensics is intended for **authorized security monitoring, network troubleshooting, digital forensics, and incident-response investigations**.
 
 Only capture or analyze network traffic on systems and networks for which you have appropriate authorization.
+
+---
+
+# 🔍 Automated Binary Reputation Verification
+
+NetForensics integrates automated binary reputation verification into the forensic artifact-analysis workflow.
+
+## CIRCL Hashlookup Integration
+
+NetForensics can query the **CIRCL Hashlookup** database in real time for carved binaries and executable artifacts.
+
+This allows the forensic pipeline to verify whether an extracted executable is already known and associated with trusted software.
+
+## SHA-256 Reputation Verification
+
+For carved binary artifacts, NetForensics uses the calculated **SHA-256 hash** to perform reputation verification against known binary repositories.
+
+The verification workflow helps distinguish known legitimate software from previously unknown or suspicious binaries.
+
+## False Positive Reduction
+
+When a carved binary matches a known legitimate software entry in the Hashlookup database, NetForensics can automatically reduce the associated threat classification.
+
+This helps minimize false positives during forensic investigations while preserving the original artifact and its forensic metadata.
+
+## Dynamic Threat Downgrading
+
+If the SHA-256 hash of a carved binary matches a trusted known binary, its threat indicator is automatically downgraded to:
+
+```text
+LevelSafe
+```
+
+This allows known legitimate software to be separated from suspicious or unknown artifacts without removing it from the investigation results.
+
+## Forensic Workflow
+
+The automated reputation-verification workflow can be represented as:
+
+```text
+Network Traffic / PCAP
+        │
+        ▼
+TCP Stream Reassembly
+        │
+        ▼
+Artifact Carving
+        │
+        ▼
+Executable Detected
+        │
+        ▼
+SHA-256 Calculation
+        │
+        ▼
+CIRCL Hashlookup Query
+        │
+        ├──► Trusted Known Binary
+        │          │
+        │          ▼
+        │      LevelSafe
+        │
+        └──► No Trusted Match
+                   │
+                   ▼
+          Continue Threat Analysis
+```
+
+This integration adds an additional reputation-verification layer to the existing artifact carving, hashing, threat detection, and forensic reporting workflow.
