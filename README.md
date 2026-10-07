@@ -127,7 +127,7 @@ This verifies the downloaded Go module dependencies against their expected check
 If an old `bin` directory exists, remove it first:
 
 ```bash
-sudo rm -rf bin && mkdir -p bin
+sudo rm -rf bin && sudo mkdir -p bin
 ```
 
 This also helps prevent build problems caused by an old binary directory with incorrect permissions.
