@@ -143,6 +143,11 @@ func (c *Carver) CarvePayload(payload []byte, flow protocols.FlowKey, suggestedN
 		threatIndicator = forensics.LevelWarning
 	}
 
+	// Verify hash against CIRCL Hashlookup to reduce false positives
+	if known, _ := forensics.CheckHashlookup(hashes.SHA256); known {
+		threatIndicator = forensics.LevelSafe
+	}
+
 	// Write file to extracted_artifacts/ directory
 	c.mu.Lock()
 	destPath := filepath.Join(c.artifactsDir, filename)
