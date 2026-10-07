@@ -187,7 +187,7 @@ go mod verify
 
 # 3. Build optimized binary
 mkdir -p bin
-go build -ldflags="-s -w" -o bin/netforensics ./cmd/netforensics
+go build -ldflags="-s -w" -buildvcs=false -o bin/netforensics ./cmd/netforensics
 ```
 
 ### Run Unit Tests:
