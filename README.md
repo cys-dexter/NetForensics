@@ -337,6 +337,7 @@ This should be the first command used to inspect the available options supported
 
 ## Offline PCAP Analysis
 
+
 Analyze an existing capture:
 
 ```bash
@@ -356,7 +357,150 @@ PCAPNG example:
 ```
 
 The documented offline mode uses `-r` to provide the PCAP input file.
+## 📦 Preparing a PCAP File for Offline Forensics
 
+The **Offline Forensics** mode requires an existing network capture file in either:
+
+```text
+.pcap
+.pcapng
+```
+
+NetForensics does not create the offline capture file automatically. The file must be obtained from a previous packet capture or generated using a packet-capture tool such as **tcpdump** or **Wireshark**.
+
+---
+
+### Option 1 — Create a PCAP with tcpdump
+
+On Linux, first identify your available network interfaces:
+
+```bash
+ip link
+```
+
+You may see interfaces such as:
+
+```text
+eth0
+ens33
+enp0s3
+wlan0
+```
+
+You can then create a capture file with:
+
+```bash
+sudo tcpdump -i any -c 500 -w capture.pcap
+```
+
+This command captures **500 packets** and automatically stops when the limit is reached.
+
+You can generate normal network activity while the capture is running, for example by opening websites or using other network applications.
+
+The resulting file will be:
+
+```text
+capture.pcap
+```
+
+---
+
+### Capture from a Specific Interface
+
+If you know the interface you want to monitor, replace `any` with the interface name:
+
+```bash
+sudo tcpdump -i eth0 -c 500 -w capture.pcap
+```
+
+For a wireless interface:
+
+```bash
+sudo tcpdump -i wlan0 -c 500 -w capture.pcap
+```
+
+Replace `eth0` or `wlan0` with the interface available on your system.
+
+---
+
+### Option 2 — Create a PCAP with Wireshark
+
+You can also create a capture using **Wireshark**:
+
+1. Open Wireshark.
+2. Select the network interface currently being used.
+3. Start the capture.
+4. Generate some normal network traffic.
+5. Stop the capture.
+6. Select **File → Save As**.
+7. Save the capture as:
+
+```text
+capture.pcapng
+```
+
+The resulting `.pcapng` file can then be analyzed by NetForensics.
+
+---
+
+## 🔎 Running Offline Forensics
+
+After creating or obtaining a capture file, run:
+
+```bash
+./bin/netforensics -r capture.pcap
+```
+
+For a PCAPNG file:
+
+```bash
+./bin/netforensics -r capture.pcapng
+```
+
+You can also provide an absolute path:
+
+```bash
+./bin/netforensics -r /path/to/capture.pcap
+```
+
+Example:
+
+```bash
+./bin/netforensics -r ~/captures/suspicious_traffic.pcap
+```
+
+The capture file is read locally by NetForensics and analyzed without performing live packet capture.
+
+### Offline Workflow
+
+```text
+Existing PCAP / PCAPNG
+        │
+        ▼
+./bin/netforensics -r capture.pcap
+        │
+        ▼
+Packet Parsing
+        │
+        ├──► Protocol Analysis
+        ├──► Threat Detection
+        ├──► TCP Stream Analysis
+        ├──► Artifact Analysis
+        ├──► Hash Calculation
+        └──► Forensic Timeline
+```
+
+### Important
+
+Offline analysis does **not** require `sudo` merely to read a normal PCAP file:
+
+```bash
+./bin/netforensics -r capture.pcap
+```
+
+Administrative privileges are generally associated with **creating live captures**, not analyzing an existing capture file.
+
+If you do not already have a PCAP or PCAPNG file, create one first using `tcpdump` or Wireshark as described above.
 ---
 
 # 🌐 Live Network Capture
