@@ -77,10 +77,33 @@ func main() {
 	}
 
 	if *pcapPath == "" && *iface == "" {
-		fmt.Fprint(os.Stderr, banner)
-		fmt.Fprintln(os.Stderr, "\n[!] Error: You must specify either an offline capture file (-r) or a live interface (-i).")
-		fmt.Fprintln(os.Stderr, "    Run with -h or --help for full usage instructions.")
-		os.Exit(1)
+	fmt.Fprint(os.Stderr, banner)
+	fmt.Fprintln(os.Stderr, `
+No capture source specified.
+
+Offline Forensics
+  Analyze an existing PCAP or PCAPNG file:
+
+    ./bin/netforensics -r capture.pcap
+    ./bin/netforensics -r capture.pcapng
+
+  If you do not have a capture file, create one with tcpdump:
+
+    sudo tcpdump -i any -c 500 -w capture.pcap
+
+Live Network Capture
+  Capture traffic directly from a network interface:
+
+    ip link
+    sudo ./bin/netforensics -i eth0
+
+  Replace eth0 with the interface available on your system.
+
+For all available options:
+
+    ./bin/netforensics -h
+`)
+	os.Exit(1)
 	}
 
 	// Dynamic Resolution of Lead Investigator Name
